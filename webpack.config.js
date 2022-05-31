@@ -1,6 +1,10 @@
 let path = require("path");
 let MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
+const isDev = process.argv[process.argv.length - 1] !== "production";
+
+console.log(isDev);
+
 let conf = {
     entry: "./src/index.js",
     output: {
@@ -19,10 +23,50 @@ let conf = {
                 test: /\.js$/,
                 loader: "babel-loader",
                 exclude: "/node_modules/",
+                options: {
+                    sourceMap: true,
+                },
             },
             {
-                test: /\.css$/,
-                use: [MiniCssExtractPlugin.loader, "css-loader"],
+                test: /^((?!\.module).)*\.(s*)css$/,
+                use: [
+                    !isDev ? MiniCssExtractPlugin.loader : "style-loader",
+                    {
+                        loader: "css-loader",
+                        options: {
+                            url: true,
+                            sourceMap: true,
+                        },
+                    },
+                    {
+                        loader: "sass-loader",
+                        options: {
+                            sourceMap: true,
+                        },
+                    },
+                ],
+            },
+            {
+                test: /\.module\.(s*)css$/,
+                use: [
+                    !isDev ? MiniCssExtractPlugin.loader : "style-loader",
+                    {
+                        loader: "css-loader",
+                        options: {
+                            modules: {
+                                localIdentName: "[local]__[sha1:hash:hex:7]",
+                            },
+                            url: true,
+                            sourceMap: true,
+                        },
+                    },
+                    {
+                        loader: "sass-loader",
+                        options: {
+                            sourceMap: true,
+                        },
+                    },
+                ],
             },
         ],
     },
